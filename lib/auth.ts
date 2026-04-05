@@ -4,6 +4,7 @@ import { compare } from 'bcryptjs'
 import { prisma } from './db'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       name: 'credentials',
@@ -12,22 +13,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        try {
+          if (!credentials?.email || !credentials?.password) return null
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        })
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+          })
 
-        if (!user || !user.isActive) return null
+          if (!user || !user.isActive) return null
 
-        const isValid = await compare(credentials.password as string, user.password)
-        if (!isValid) return null
+          const isValid = await compare(credentials.password as string, user.password)
+          if (!isValid) return null
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
+        } catch (e) {
+          console.error('[auth] authorize error:', e)
+          return null
         }
       },
     }),
