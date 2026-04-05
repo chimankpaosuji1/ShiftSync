@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,25 +17,34 @@ const DEMO_ACCOUNTS = [
 ]
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
-    e.preventDefault()
+  async function doLogin(e: string, p: string) {
     setLoading(true)
     setError('')
-    const result = await loginAction(email, password)
-    if (result?.error) { setError(result.error); setLoading(false) }
-    // On success the server action redirects — page navigates away, no need to setLoading(false)
+    const result = await loginAction(e, p)
+    if (result?.error) {
+      setError(result.error)
+      setLoading(false)
+    } else {
+      // push then refresh forces the root layout to re-run on the server,
+      // picking up the new session cookie and updating SessionProvider
+      router.push('/dashboard')
+      router.refresh()
+    }
+  }
+
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault()
+    doLogin(email, password)
   }
 
   async function loginAs(demoEmail: string, demoPassword: string) {
-    setLoading(true)
-    setError('')
-    const result = await loginAction(demoEmail, demoPassword)
-    if (result?.error) { setError(result.error); setLoading(false) }
+    doLogin(demoEmail, demoPassword)
   }
 
   return (
