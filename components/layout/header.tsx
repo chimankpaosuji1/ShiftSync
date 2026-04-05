@@ -1,9 +1,10 @@
 'use client'
-import { useSession, signOut } from 'next-auth/react'
-import { Bell, LogOut, User } from 'lucide-react'
+import { signOut } from 'next-auth/react'
+import { Bell, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useUser } from '@/components/layout/user-context'
 
 function getInitials(name?: string | null) {
   if (!name) return '?'
@@ -11,7 +12,7 @@ function getInitials(name?: string | null) {
 }
 
 export function Header({ title }: { title?: string }) {
-  const { data: session } = useSession()
+  const user = useUser()
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
@@ -49,9 +50,9 @@ export function Header({ title }: { title?: string }) {
         <Link href="/profile">
           <button className="h-8 w-8 rounded-full ml-1 flex items-center justify-center text-xs font-bold text-white hover:opacity-90 transition-opacity"
             style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}
-            title={session?.user?.name ?? ''}
+            title={user?.name ?? ''}
           >
-            {getInitials(session?.user?.name)}
+            {getInitials(user?.name)}
           </button>
         </Link>
 
