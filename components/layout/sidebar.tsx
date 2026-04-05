@@ -1,7 +1,6 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import {
   LayoutDashboard, Calendar, Users, ArrowLeftRight,
   BarChart2, ClipboardList, Bell, Menu, X, Clock, Zap, MapPin
@@ -32,10 +31,13 @@ function getInitials(name?: string | null) {
   return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  user: { name: string; role: string }
+}
+
+export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
-  const { data: session } = useSession()
-  const role = session?.user?.role as string
+  const role = user.role
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const filtered = navItems.filter((item) => item.roles.includes(role))
@@ -94,10 +96,10 @@ export function Sidebar() {
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/6 hover:bg-white/10 transition-colors cursor-default">
           <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 text-white"
             style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
-            {getInitials(session?.user?.name)}
+            {getInitials(user.name)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-white truncate">{session?.user?.name}</p>
+            <p className="text-xs font-medium text-white truncate">{user.name}</p>
             <p className="text-[10px] text-slate-400 capitalize">{role?.toLowerCase()}</p>
           </div>
           <span className={cn('shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded', roleColors[role] ?? 'bg-slate-500/20 text-slate-300')}>
