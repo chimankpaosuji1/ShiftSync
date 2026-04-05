@@ -1,11 +1,10 @@
 'use client'
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AlertCircle, Loader2, Zap } from 'lucide-react'
+import { loginAction } from '@/app/actions/auth'
 
 const DEMO_ACCOUNTS = [
   { label: 'Admin', email: 'admin@coastaleats.com', password: 'password123', color: 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-200', dot: 'bg-violet-400' },
@@ -17,29 +16,25 @@ const DEMO_ACCOUNTS = [
 ]
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const result = await signIn('credentials', { email, password, redirect: false })
-    setLoading(false)
-    if (result?.error) setError('Invalid email or password')
-    else { router.push('/dashboard'); router.refresh() }
+    const result = await loginAction(email, password)
+    if (result?.error) { setError(result.error); setLoading(false) }
+    // On success the server action redirects — page navigates away, no need to setLoading(false)
   }
 
   async function loginAs(demoEmail: string, demoPassword: string) {
     setLoading(true)
     setError('')
-    const result = await signIn('credentials', { email: demoEmail, password: demoPassword, redirect: false })
-    setLoading(false)
-    if (result?.error) setError('Demo login failed — ensure the database is seeded')
-    else { router.push('/dashboard'); router.refresh() }
+    const result = await loginAction(demoEmail, demoPassword)
+    if (result?.error) { setError(result.error); setLoading(false) }
   }
 
   return (
