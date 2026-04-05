@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@/components/layout/user-context'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -31,8 +31,7 @@ function formatDateTime(iso: string, tz: string) {
 }
 
 export default function DashboardPage() {
-  const { data: session } = useSession()
-  const role = session?.user?.role as string | undefined
+  const { role } = useUser()
 
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)

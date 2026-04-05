@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@/components/layout/user-context'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,8 +39,8 @@ function escapeCsv(val: unknown): string {
 }
 
 export default function AuditPage() {
-  const { data: session } = useSession()
-  const isAdmin = session?.user?.role === 'ADMIN'
+  const { role } = useUser()
+  const isAdmin = role === 'ADMIN'
 
   const [logs, setLogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)

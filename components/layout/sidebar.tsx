@@ -32,7 +32,7 @@ function getInitials(name?: string | null) {
 }
 
 interface SidebarProps {
-  user: { name: string; role: string }
+  user: { id: string; name: string; role: string }
 }
 
 export function Sidebar({ user }: SidebarProps) {

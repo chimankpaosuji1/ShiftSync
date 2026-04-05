@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@/components/layout/user-context'
 import { Header } from '@/components/layout/header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -37,10 +37,8 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'success' | 'warni
 }
 
 export default function SwapsPage() {
-  const { data: session } = useSession()
+  const { role, id: userId } = useUser()
   const { toast } = useToast()
-  const role = session?.user?.role as string
-  const userId = session?.user?.id as string
 
   const [swaps, setSwaps] = useState<SwapRow[]>([])
   const [openDrops, setOpenDrops] = useState<SwapRow[]>([])
