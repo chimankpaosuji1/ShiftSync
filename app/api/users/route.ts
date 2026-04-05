@@ -65,7 +65,7 @@ export async function POST(req: Request) {
         password: hashed,
         name,
         role: role || 'STAFF',
-        desiredHours: desiredHours || 40,
+        desiredHours: parseInt(desiredHours) || 40,
         skills: skills?.length ? { create: skills.map((skillId: string) => ({ skillId })) } : undefined,
         certifications: certifications?.length
           ? { create: certifications.map((locationId: string) => ({ locationId })) }
