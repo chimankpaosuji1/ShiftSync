@@ -15,10 +15,16 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check JWT token (edge-compatible — no DB access)
+  // NextAuth v5 changed cookie name from "next-auth.session-token" to "authjs.session-token"
+  // On HTTPS (production) it gets a __Secure- prefix
+  const isSecure = req.nextUrl.protocol === 'https:'
+  const cookieName = isSecure ? '__Secure-authjs.session-token' : 'authjs.session-token'
+
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+    cookieName,
+    salt: cookieName,
   })
 
   if (!token) {
