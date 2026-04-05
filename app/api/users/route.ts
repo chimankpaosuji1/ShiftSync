@@ -58,27 +58,31 @@ export async function POST(req: Request) {
 
   const hashed = await hash(password, 12)
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashed,
-      name,
-      role: role || 'STAFF',
-      desiredHours: desiredHours || 40,
-      skills: skills?.length ? { create: skills.map((skillId: string) => ({ skillId })) } : undefined,
-      certifications: certifications?.length
-        ? { create: certifications.map((locationId: string) => ({ locationId })) }
-        : undefined,
-      managedLocations: managedLocations?.length
-        ? { create: managedLocations.map((locationId: string) => ({ locationId })) }
-        : undefined,
-    },
-    include: {
-      skills: { include: { skill: true } },
-      certifications: { include: { location: true } },
-    },
-  })
-
-  const { password: _, ...safeUser } = user
-  return ok(safeUser, 201)
+  try {
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashed,
+        name,
+        role: role || 'STAFF',
+        desiredHours: desiredHours || 40,
+        skills: skills?.length ? { create: skills.map((skillId: string) => ({ skillId })) } : undefined,
+        certifications: certifications?.length
+          ? { create: certifications.map((locationId: string) => ({ locationId })) }
+          : undefined,
+        managedLocations: managedLocations?.length
+          ? { create: managedLocations.map((locationId: string) => ({ locationId })) }
+          : undefined,
+      },
+      include: {
+        skills: { include: { skill: true } },
+        certifications: { include: { location: true } },
+      },
+    })
+    const { password: _, ...safeUser } = user
+    return ok(safeUser, 201)
+  } catch (e) {
+    console.error('[POST /api/users]', e)
+    return err(e instanceof Error ? e.message : 'Failed to create user', 500)
+  }
 }
