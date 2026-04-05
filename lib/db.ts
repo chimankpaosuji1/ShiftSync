@@ -9,14 +9,17 @@ function getDbUrl(): string {
   // DATABASE_URL must be set; for local SQLite provide absolute file:/// URL
   const url = process.env.DATABASE_URL ?? 'file:///dev.db'
   // Already absolute or remote
-  if (url.startsWith('libsql://') || url.startsWith('file:///')) return url
+  if (url.startsWith('libsql://') || url.startsWith('https://') || url.startsWith('file:///')) return url
   // Relative file: path — caller must set absolute path in DATABASE_URL
   if (url.startsWith('file:')) return url
   return url
 }
 
 function createPrismaClient() {
-  const adapter = new PrismaLibSql({ url: getDbUrl() })
+  const adapter = new PrismaLibSql({
+    url: getDbUrl(),
+    ...(process.env.TURSO_AUTH_TOKEN && { authToken: process.env.TURSO_AUTH_TOKEN }),
+  })
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
