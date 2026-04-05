@@ -62,7 +62,7 @@ Alice has a pending SWAP request with Bob for Friday evening. Log in as **staff.
 |-------|-----------|
 | Framework | Next.js 16 App Router (Turbopack) |
 | Language | TypeScript |
-| Database | SQLite via Prisma 7 + libsql adapter |
+| Database | Turso (libsql) via Prisma 7 + libsql adapter |
 | Auth | NextAuth v5 (JWT, credentials) |
 | Styling | Tailwind CSS v4 + Radix UI primitives |
 | Charts | Recharts |
@@ -115,12 +115,16 @@ When blocked, the system explains which rule was broken, shows specifics, and su
 
 - Email notifications are simulated (in-app only).
 - SSE manager is in-process — use Redis pub/sub for multi-instance deployments.
-- SQLite is single-file — suitable for demo. Swap `DATABASE_URL` to a Turso or PostgreSQL URL for production.
+- Production database is Turso (libsql cloud). Set `DATABASE_URL` and `TURSO_AUTH_TOKEN` in your environment.
 
 ---
 
 ## Re-seeding
 
 ```bash
-npx ts-node --compiler-options '{"module":"CommonJS","esModuleInterop":true}' prisma/seed.ts
+DATABASE_URL=libsql://your-db.turso.io TURSO_AUTH_TOKEN=your-token npx tsx prisma/seed.ts
 ```
+
+For local development, omit the env vars — it will seed the local `dev.db`.
+
+
