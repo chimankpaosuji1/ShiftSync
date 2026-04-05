@@ -18,8 +18,10 @@ import { addDays, addHours } from 'date-fns'
 import { fromZonedTime } from 'date-fns-tz'
 import * as path from 'path'
 
-const dbPath = path.resolve(process.cwd(), 'dev.db').replace(/\\/g, '/')
-const adapter = new PrismaLibSql({ url: `file:///${dbPath}` })
+const dbUrl = process.env.DATABASE_URL ?? `file:///${path.resolve(process.cwd(), 'dev.db').replace(/\\/g, '/')}`
+const adapterOptions: Record<string, string> = { url: dbUrl }
+if (process.env.TURSO_AUTH_TOKEN) adapterOptions.authToken = process.env.TURSO_AUTH_TOKEN
+const adapter = new PrismaLibSql(adapterOptions)
 const prisma = new PrismaClient({ adapter })
 
 function localToUtc(date: Date, hour: number, minute: number, timezone: string): Date {
