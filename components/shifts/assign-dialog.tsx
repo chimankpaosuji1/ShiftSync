@@ -52,14 +52,14 @@ export function AssignDialog({ shift, open, onClose, onAssigned }: AssignDialogP
     })
       .then((r) => r.json())
       .then((data) => {
-        if (data.blocked || data.violations) {
-          setCheckResult(data)
-        } else if (data.assignment) {
-          // Actually assigned successfully (no violations)
+        if (data.assignment) {
+          // Assigned successfully — no hard blocks
           setCheckResult({ blocked: false, violations: [], warnings: data.warnings || [], suggestions: [] })
           toast('Staff member assigned successfully', 'success')
           onAssigned()
           onClose()
+        } else if (data.blocked || (data.violations?.length > 0)) {
+          setCheckResult(data)
         }
       })
       .catch(() => toast('Failed to check constraints', 'error'))
