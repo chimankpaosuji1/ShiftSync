@@ -216,59 +216,118 @@ export default function SchedulePage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-2 flex-1 min-h-0">
-            {weekDays.map((day, i) => {
-              const dayShifts = getShiftsForDay(day)
-              const isToday = day.toISOString().split('T')[0] === todayStr
-              const isPast = day.toISOString().split('T')[0] < todayStr
+          <>
+            {/* Mobile: vertical day list */}
+            <div className="lg:hidden flex flex-col gap-3">
+              {weekDays.map((day, i) => {
+                const dayShifts = getShiftsForDay(day)
+                const isToday = day.toISOString().split('T')[0] === todayStr
+                const isPast = day.toISOString().split('T')[0] < todayStr
 
-              return (
-                <div key={i} className="flex flex-col min-h-0">
-                  {/* Day header */}
-                  <div className="mb-2 text-center">
-                    <div className={`inline-flex flex-col items-center px-2 py-1.5 rounded-xl w-full transition-colors ${isToday ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200' : isPast ? 'text-slate-400' : 'text-slate-600'}`}>
-                      <span className="text-[11px] font-semibold uppercase tracking-wide">{DAYS[i]}</span>
-                      <span className={`text-[13px] font-bold leading-tight ${isToday ? 'text-white' : ''}`}>
-                        {format(day, 'MMM d')}
-                      </span>
+                return (
+                  <div key={i} className="rounded-2xl border bg-white shadow-sm overflow-hidden">
+                    {/* Day header */}
+                    <div className={`flex items-center justify-between px-4 py-2.5 ${isToday ? 'bg-indigo-600' : isPast ? 'bg-slate-50' : 'bg-slate-50'}`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-bold ${isToday ? 'text-white' : isPast ? 'text-slate-400' : 'text-slate-700'}`}>
+                          {DAYS[i]}
+                        </span>
+                        <span className={`text-sm ${isToday ? 'text-indigo-200' : isPast ? 'text-slate-400' : 'text-slate-500'}`}>
+                          {format(day, 'MMM d')}
+                        </span>
+                        {isToday && (
+                          <span className="text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full">Today</span>
+                        )}
+                      </div>
+                      {role !== 'STAFF' && (
+                        <button
+                          onClick={() => handleCreateShift(day)}
+                          className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg transition-colors ${isToday ? 'bg-white/15 text-white hover:bg-white/25' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}
+                        >
+                          <Plus className="h-3 w-3" />
+                          Add
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Shifts */}
+                    <div className="p-3 flex flex-col gap-2">
+                      {dayShifts.length === 0 ? (
+                        <p className="text-center text-xs text-slate-300 py-2">No shifts</p>
+                      ) : (
+                        dayShifts.map((shift) => (
+                          <ShiftCard
+                            key={shift.id}
+                            shift={shift}
+                            isManager={role !== 'STAFF'}
+                            currentUserId={userId}
+                            onAssign={role !== 'STAFF' ? setAssignTarget : undefined}
+                            onEdit={role !== 'STAFF' ? (s) => { window.location.href = `/shifts?edit=${s.id}` } : undefined}
+                            onSwapRequest={role === 'STAFF' ? (s) => { window.location.href = `/swaps?request=${s.id}` } : undefined}
+                          />
+                        ))
+                      )}
                     </div>
                   </div>
+                )
+              })}
+            </div>
 
-                  {/* Shifts */}
-                  <div className="flex flex-col gap-2 flex-1">
-                    {dayShifts.map((shift) => (
-                      <ShiftCard
-                        key={shift.id}
-                        shift={shift}
-                        isManager={role !== 'STAFF'}
-                        currentUserId={userId}
-                        onAssign={role !== 'STAFF' ? setAssignTarget : undefined}
-                        onEdit={role !== 'STAFF' ? (s) => { window.location.href = `/shifts?edit=${s.id}` } : undefined}
-                        onSwapRequest={role === 'STAFF' ? (s) => { window.location.href = `/swaps?request=${s.id}` } : undefined}
-                      />
-                    ))}
+            {/* Desktop: 7-column grid */}
+            <div className="hidden lg:grid grid-cols-7 gap-2 flex-1 min-h-0">
+              {weekDays.map((day, i) => {
+                const dayShifts = getShiftsForDay(day)
+                const isToday = day.toISOString().split('T')[0] === todayStr
+                const isPast = day.toISOString().split('T')[0] < todayStr
 
-                    {/* Add button */}
-                    {role !== 'STAFF' && (
-                      <button
-                        onClick={() => handleCreateShift(day)}
-                        className="mt-auto w-full flex items-center justify-center gap-1 py-2 text-[11px] text-slate-400 border border-dashed border-slate-200 rounded-xl hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50/50 transition-all duration-150"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add
-                      </button>
-                    )}
-
-                    {dayShifts.length === 0 && role === 'STAFF' && (
-                      <div className="flex items-center justify-center py-6 border border-dashed border-slate-200 rounded-xl">
-                        <span className="text-[11px] text-slate-300">No shifts</span>
+                return (
+                  <div key={i} className="flex flex-col min-h-0">
+                    {/* Day header */}
+                    <div className="mb-2 text-center">
+                      <div className={`inline-flex flex-col items-center px-2 py-1.5 rounded-xl w-full transition-colors ${isToday ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200' : isPast ? 'text-slate-400' : 'text-slate-600'}`}>
+                        <span className="text-[11px] font-semibold uppercase tracking-wide">{DAYS[i]}</span>
+                        <span className={`text-[13px] font-bold leading-tight ${isToday ? 'text-white' : ''}`}>
+                          {format(day, 'MMM d')}
+                        </span>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Shifts */}
+                    <div className="flex flex-col gap-2 flex-1">
+                      {dayShifts.map((shift) => (
+                        <ShiftCard
+                          key={shift.id}
+                          shift={shift}
+                          isManager={role !== 'STAFF'}
+                          currentUserId={userId}
+                          onAssign={role !== 'STAFF' ? setAssignTarget : undefined}
+                          onEdit={role !== 'STAFF' ? (s) => { window.location.href = `/shifts?edit=${s.id}` } : undefined}
+                          onSwapRequest={role === 'STAFF' ? (s) => { window.location.href = `/swaps?request=${s.id}` } : undefined}
+                        />
+                      ))}
+
+                      {/* Add button */}
+                      {role !== 'STAFF' && (
+                        <button
+                          onClick={() => handleCreateShift(day)}
+                          className="mt-auto w-full flex items-center justify-center gap-1 py-2 text-[11px] text-slate-400 border border-dashed border-slate-200 rounded-xl hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50/50 transition-all duration-150"
+                        >
+                          <Plus className="h-3 w-3" />
+                          Add
+                        </button>
+                      )}
+
+                      {dayShifts.length === 0 && role === 'STAFF' && (
+                        <div className="flex items-center justify-center py-6 border border-dashed border-slate-200 rounded-xl">
+                          <span className="text-[11px] text-slate-300">No shifts</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          </>
         )}
       </main>
 
